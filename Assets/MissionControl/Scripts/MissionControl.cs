@@ -581,30 +581,33 @@ public class MissionControl : MonoBehaviour {
             }
             break;
 
-        case 10: //The Mountain / The Mountain B-Side
-            if (solveCount == 1 && !goldenActive) {
-                Debug.Log(Bomb.GetSolvedModuleIDs()[0]);
-                if (Bomb.GetSolvedModuleIDs()[0] == "MissionControl") {
-                    goldenActive = true;
-                    TimeRemaining.FromModule(Module, Bomb.GetTime() + 3600f);
+        case 10: // The Mountain / The Mountain B-Side
+            if (goldenPresent) {
+                if (solveCount == 1 && !goldenActive) {
+                    if (Bomb.GetSolvedModuleIDs()[0] == "MissionControl") {
+                        goldenActive = true;
+                        TimeRemaining.FromModule(Module, Bomb.GetTime() + 3600f);
+                    }
+                    else {
+                        goldenPresent = false;
+                        GoldenSlot.sprite = null;
+                        ButtonTransform.localEulerAngles = new Vector3(0f, 0f, 90f);
+                    }
                 }
-                else {
+                if (solveCount == Bomb.GetSolvableModuleIDs().Count() && goldenActive) {
                     goldenPresent = false;
-                    GoldenSlot.sprite = null;
-                    ButtonTransform.localEulerAngles = new Vector3(0f, 0f, 90f);
+                    StartCoroutine(GoldenCollect());
                 }
-            }
-            if (solveCount == Bomb.GetSolvableModuleIDs().Count() && goldenActive && goldenPresent) {
-                goldenPresent = false;
-                StartCoroutine(GoldenCollect());
-            }
-            if (Bomb.GetStrikes() > 0 && goldenActive) {
-                Debug.LogFormat("[Mission Control #{0}] Struck with the golden strawberry. Detonating bomb.", moduleId);
-                StartCoroutine(DetonateBomb(5));
-            }
-            if (Bomb.GetTime() < 3600f && goldenActive) {
-                Debug.LogFormat("[Mission Control #{0}] Ran out of time with the golden strawberry. Detonating bomb.", moduleId);
-                StartCoroutine(DetonateBomb(5));
+                if (Bomb.GetStrikes() > 0 && goldenActive) {
+                    goldenPresent = false;
+                    Debug.LogFormat("[Mission Control #{0}] Struck with the golden strawberry. Detonating bomb.", moduleId);
+                    StartCoroutine(DetonateBomb(5));
+                }
+                if (Bomb.GetTime() < 3600f && goldenActive) {
+                    goldenPresent = false;
+                    Debug.LogFormat("[Mission Control #{0}] Ran out of time with the golden strawberry. Detonating bomb.", moduleId);
+                    StartCoroutine(DetonateBomb(5));
+                }
             }
             break;
         }
